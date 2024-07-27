@@ -8,9 +8,12 @@ _This plugin requires a Rust version of at least **1.64**_
 
 There are three general methods of installation that we can recommend.
 
-1. Use crates.io and npm (easiest, and requires you to trust that our publishing pipeline worked)
-2. Pull sources directly from Github using git tags / revision hashes (most secure)
-3. Git submodule install this repo in your tauri project and then use file protocol to ingest the source (most secure, but inconvenient to use)
+1. Use crates.io and npm (easiest, and requires you to trust that our publishing
+   pipeline worked)
+2. Pull sources directly from Github using git tags / revision hashes (most
+   secure)
+3. Git submodule install this repo in your tauri project and then use file
+   protocol to ingest the source (most secure, but inconvenient to use)
 
 Install the Core plugin by adding the following to your `Cargo.toml` file:
 
@@ -21,9 +24,12 @@ Install the Core plugin by adding the following to your `Cargo.toml` file:
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 ```
 
-You can install the JavaScript Guest bindings using your preferred JavaScript package manager:
+You can install the JavaScript Guest bindings using your preferred JavaScript
+package manager:
 
-> Note: Since most JavaScript package managers are unable to install packages from git monorepos we provide read-only mirrors of each plugin. This makes installation option 2 more ergonomic to use.
+> Note: Since most JavaScript package managers are unable to install packages
+> from git monorepos we provide read-only mirrors of each plugin. This makes
+> installation option 2 more ergonomic to use.
 
 ```sh
 pnpm add https://github.com/tauri-apps/tauri-plugin-store#v1
@@ -48,7 +54,8 @@ fn main() {
 }
 ```
 
-Afterwards all the plugin's APIs are available through the JavaScript guest bindings:
+Afterwards all the plugin's APIs are available through the JavaScript guest
+bindings:
 
 ```typescript
 import { Store } from "tauri-plugin-store-api";
@@ -60,9 +67,9 @@ await store.set("some-key", { value: 5 });
 const val = await store.get<{ value: number }>("some-key");
 
 if (val) {
-  console.log(val);
+	console.log(val);
 } else {
-  console.log("val is null");
+	console.log("val is null");
 }
 
 await store.save(); // this manually saves the store, otherwise the store is only saved when your app is closed
@@ -96,7 +103,9 @@ fn main() {
 }
 ```
 
-As you may have noticed, the Store created above isn't accessible to the frontend. To interoperate with stores created by JS use the exported `with_store` method:
+As you may have noticed, the Store created above isn't accessible to the
+frontend. To interoperate with stores created by JS use the exported
+`with_store` method:
 
 ```rust
 use tauri::Wry;
@@ -110,7 +119,8 @@ with_store(app_handle, stores, path, |store| store.insert("a".to_string(), json!
 
 ## Contributing
 
-PRs accepted. Please make sure to read the Contributing Guide before making a pull request.
+PRs accepted. Please make sure to read the Contributing Guide before making a
+pull request.
 
 ## Partners
 
@@ -126,7 +136,9 @@ PRs accepted. Please make sure to read the Contributing Guide before making a pu
   </tbody>
 </table>
 
-For the complete list of sponsors please visit our [website](https://tauri.app#sponsors) and [Open Collective](https://opencollective.com/tauri).
+For the complete list of sponsors please visit our
+[website](https://tauri.app#sponsors) and
+[Open Collective](https://opencollective.com/tauri).
 
 ## License
 
