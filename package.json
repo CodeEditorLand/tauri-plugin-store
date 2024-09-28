@@ -1,5 +1,15 @@
 {
+<<<<<<< HEAD
 	"name": "tauri-plugin-store-api",
+=======
+	"authors": [
+		"Tauri Programme within The Commons Conservancy"
+	],
+	"browser": "dist-js/index.min.js",
+	"dependencies": {
+		"@tauri-apps/api": "2.0.0-rc.5"
+	},
+>>>>>>> 71e0d83244fab46904dca288f12c1c68c7153c47
 	"description": "Simple, persistent key-value store.",
 	"exports": {
 		"browser": "./dist-js/index.min.js",
