@@ -15,15 +15,9 @@ use tauri::{AppHandle, Manager, Runtime};
 use crate::{ChangePayload, Error};
 
 type SerializeFn =
-	fn(
-		&HashMap<String, JsonValue>,
-	) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>>;
-type DeserializeFn = fn(
-	&[u8],
-) -> Result<
-	HashMap<String, JsonValue>,
-	Box<dyn std::error::Error + Send + Sync>,
->;
+	fn(&HashMap<String, JsonValue>) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>>;
+type DeserializeFn =
+	fn(&[u8]) -> Result<HashMap<String, JsonValue>, Box<dyn std::error::Error + Send + Sync>>;
 
 fn default_serialize(
 	cache:&HashMap<String, JsonValue>,
@@ -33,8 +27,7 @@ fn default_serialize(
 
 fn default_deserialize(
 	bytes:&[u8],
-) -> Result<HashMap<String, JsonValue>, Box<dyn std::error::Error + Send + Sync>>
-{
+) -> Result<HashMap<String, JsonValue>, Box<dyn std::error::Error + Send + Sync>> {
 	serde_json::from_slice(bytes).map_err(Into::into)
 }
 
@@ -183,28 +176,19 @@ pub struct Store<R:Runtime> {
 impl<R:Runtime> Store<R> {
 	/// Update the store from the on-disk state
 	pub fn load(&mut self) -> Result<(), Error> {
-		let app_dir = self
-			.app
-			.path_resolver()
-			.app_data_dir()
-			.expect("failed to resolve app dir");
+		let app_dir = self.app.path_resolver().app_data_dir().expect("failed to resolve app dir");
 		let store_path = app_dir.join(&self.path);
 
 		let bytes = read(store_path)?;
 
-		self.cache
-			.extend((self.deserialize)(&bytes).map_err(Error::Deserialize)?);
+		self.cache.extend((self.deserialize)(&bytes).map_err(Error::Deserialize)?);
 
 		Ok(())
 	}
 
 	/// Saves the store to disk
 	pub fn save(&self) -> Result<(), Error> {
-		let app_dir = self
-			.app
-			.path_resolver()
-			.app_data_dir()
-			.expect("failed to resolve app dir");
+		let app_dir = self.app.path_resolver().app_data_dir().expect("failed to resolve app dir");
 		let store_path = app_dir.join(&self.path);
 
 		create_dir_all(store_path.parent().expect("invalid store path"))?;
@@ -226,24 +210,16 @@ impl<R:Runtime> Store<R> {
 		Ok(())
 	}
 
-	pub fn get(&self, key:impl AsRef<str>) -> Option<&JsonValue> {
-		self.cache.get(key.as_ref())
-	}
+	pub fn get(&self, key:impl AsRef<str>) -> Option<&JsonValue> { self.cache.get(key.as_ref()) }
 
-	pub fn has(&self, key:impl AsRef<str>) -> bool {
-		self.cache.contains_key(key.as_ref())
-	}
+	pub fn has(&self, key:impl AsRef<str>) -> bool { self.cache.contains_key(key.as_ref()) }
 
 	pub fn delete(&mut self, key:impl AsRef<str>) -> Result<bool, Error> {
 		let flag = self.cache.remove(key.as_ref()).is_some();
 		if flag {
 			self.app.emit_all(
 				"store://change",
-				ChangePayload {
-					path:&self.path,
-					key:key.as_ref(),
-					value:&JsonValue::Null,
-				},
+				ChangePayload { path:&self.path, key:key.as_ref(), value:&JsonValue::Null },
 			)?;
 		}
 		Ok(flag)
@@ -255,11 +231,7 @@ impl<R:Runtime> Store<R> {
 		for key in keys {
 			self.app.emit_all(
 				"store://change",
-				ChangePayload {
-					path:&self.path,
-					key:&key,
-					value:&JsonValue::Null,
-				},
+				ChangePayload { path:&self.path, key:&key, value:&JsonValue::Null },
 			)?;
 		}
 		Ok(())
@@ -277,9 +249,7 @@ impl<R:Runtime> Store<R> {
 							ChangePayload {
 								path:&self.path,
 								key,
-								value:defaults
-									.get(key)
-									.unwrap_or(&JsonValue::Null),
+								value:defaults.get(key).unwrap_or(&JsonValue::Null),
 							},
 						);
 					}
@@ -294,13 +264,9 @@ impl<R:Runtime> Store<R> {
 
 	pub fn keys(&self) -> impl Iterator<Item = &String> { self.cache.keys() }
 
-	pub fn values(&self) -> impl Iterator<Item = &JsonValue> {
-		self.cache.values()
-	}
+	pub fn values(&self) -> impl Iterator<Item = &JsonValue> { self.cache.values() }
 
-	pub fn entries(&self) -> impl Iterator<Item = (&String, &JsonValue)> {
-		self.cache.iter()
-	}
+	pub fn entries(&self) -> impl Iterator<Item = (&String, &JsonValue)> { self.cache.iter() }
 
 	pub fn len(&self) -> usize { self.cache.len() }
 

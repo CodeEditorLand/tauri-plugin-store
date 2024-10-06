@@ -55,8 +55,7 @@ pub fn with_store<R:Runtime, T, F:FnOnce(&mut Store<R>) -> Result<T, Error>>(
 		// ignore loading errors, just use the default
 		if let Err(err) = store.load() {
 			warn!(
-				"Failed to load store {:?} from disk: {}. Falling back to \
-				 default values.",
+				"Failed to load store {:?} from disk: {}. Falling back to default values.",
 				path, err
 			);
 		}
@@ -228,10 +227,7 @@ impl<R:Runtime> Builder<R> {
 	/// # }
 	/// ```
 	pub fn stores<T:IntoIterator<Item = Store<R>>>(mut self, stores:T) -> Self {
-		self.stores = stores
-			.into_iter()
-			.map(|store| (store.path.clone(), store))
-			.collect();
+		self.stores = stores.into_iter().map(|store| (store.path.clone(), store)).collect();
 		self
 	}
 
@@ -276,25 +272,22 @@ impl<R:Runtime> Builder<R> {
 	pub fn build(mut self) -> TauriPlugin<R> {
 		plugin::Builder::new("store")
 			.invoke_handler(tauri::generate_handler![
-				set, get, has, delete, clear, reset, keys, values, length,
-				entries, load, save
+				set, get, has, delete, clear, reset, keys, values, length, entries, load, save
 			])
 			.setup(move |app_handle| {
 				for (path, store) in self.stores.iter_mut() {
 					// ignore loading errors, just use the default
 					if let Err(err) = store.load() {
 						warn!(
-							"Failed to load store {:?} from disk: {}. Falling \
-							 back to default values.",
+							"Failed to load store {:?} from disk: {}. Falling back to default \
+							 values.",
 							path, err
 						);
 					}
 				}
 
-				app_handle.manage(StoreCollection {
-					stores:Mutex::new(self.stores),
-					frozen:self.frozen,
-				});
+				app_handle
+					.manage(StoreCollection { stores:Mutex::new(self.stores), frozen:self.frozen });
 
 				Ok(())
 			})
@@ -302,17 +295,9 @@ impl<R:Runtime> Builder<R> {
 				if let RunEvent::Exit = event {
 					let collection = app_handle.state::<StoreCollection<R>>();
 
-					for store in collection
-						.stores
-						.lock()
-						.expect("mutex poisoned")
-						.values()
-					{
+					for store in collection.stores.lock().expect("mutex poisoned").values() {
 						if let Err(err) = store.save() {
-							eprintln!(
-								"failed to save store {:?} with error {:?}",
-								store.path, err
-							);
+							eprintln!("failed to save store {:?} with error {:?}", store.path, err);
 						}
 					}
 				}
