@@ -5,6 +5,7 @@ import { UnlistenFn } from "@tauri-apps/api/event";
  */
 export declare class Store {
 	path: string;
+
 	constructor(path: string);
 	/**
 	 * Inserts a key-value pair into the store.

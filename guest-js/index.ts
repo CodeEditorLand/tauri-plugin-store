@@ -16,6 +16,7 @@ interface ChangePayload<T> {
  */
 export class Store {
 	path: string;
+
 	constructor(path: string) {
 		this.path = path;
 	}
