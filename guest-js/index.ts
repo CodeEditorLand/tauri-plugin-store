@@ -7,7 +7,9 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 interface ChangePayload<T> {
 	path: string;
+
 	key: string;
+
 	value: T | null;
 }
 
