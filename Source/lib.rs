@@ -47,10 +47,12 @@ pub fn with_store<R:Runtime, T, F:FnOnce(&mut Store<R>) -> Result<T, Error>>(
 	let mut stores = collection.stores.lock().expect("mutex poisoned");
 
 	let path = path.as_ref();
+
 	if !stores.contains_key(path) {
 		if collection.frozen {
 			return Err(Error::NotFound(path.to_path_buf()));
 		}
+
 		let mut store = StoreBuilder::new(app, path.to_path_buf()).build();
 		// ignore loading errors, just use the default
 		if let Err(err) = store.load() {
@@ -59,6 +61,7 @@ pub fn with_store<R:Runtime, T, F:FnOnce(&mut Store<R>) -> Result<T, Error>>(
 				path, err
 			);
 		}
+
 		stores.insert(path.to_path_buf(), store);
 	}
 
@@ -208,6 +211,7 @@ impl<R:Runtime> Builder<R> {
 	/// ```
 	pub fn store(mut self, store:Store<R>) -> Self {
 		self.stores.insert(store.path.clone(), store);
+
 		self
 	}
 
@@ -228,6 +232,7 @@ impl<R:Runtime> Builder<R> {
 	/// ```
 	pub fn stores<T:IntoIterator<Item = Store<R>>>(mut self, stores:T) -> Self {
 		self.stores = stores.into_iter().map(|store| (store.path.clone(), store)).collect();
+
 		self
 	}
 
@@ -250,6 +255,7 @@ impl<R:Runtime> Builder<R> {
 	/// ```
 	pub fn freeze(mut self) -> Self {
 		self.frozen = true;
+
 		self
 	}
 

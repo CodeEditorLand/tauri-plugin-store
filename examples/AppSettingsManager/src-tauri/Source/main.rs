@@ -22,9 +22,11 @@ fn main() {
 			match app_settings {
 				Ok(app_settings) => {
 					let theme = app_settings.theme;
+
 					let launch_at_login = app_settings.launch_at_login;
 
 					println!("theme {}", theme);
+
 					println!("launch_at_login {}", launch_at_login);
 
 					Ok(())

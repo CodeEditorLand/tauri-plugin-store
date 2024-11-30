@@ -82,9 +82,12 @@ impl<R:Runtime> StoreBuilder<R> {
 	///
 	/// # Ok(())
 	/// # }
+
 	pub fn defaults(mut self, defaults:HashMap<String, JsonValue>) -> Self {
 		self.cache.clone_from(&defaults);
+
 		self.defaults = Some(defaults);
+
 		self
 	}
 
@@ -100,9 +103,12 @@ impl<R:Runtime> StoreBuilder<R> {
 	///
 	/// # Ok(())
 	/// # }
+
 	pub fn default(mut self, key:String, value:JsonValue) -> Self {
 		self.cache.insert(key.clone(), value.clone());
+
 		self.defaults.get_or_insert(HashMap::new()).insert(key, value);
+
 		self
 	}
 
@@ -118,8 +124,10 @@ impl<R:Runtime> StoreBuilder<R> {
 	///
 	/// # Ok(())
 	/// # }
+
 	pub fn serialize(mut self, serialize:SerializeFn) -> Self {
 		self.serialize = serialize;
+
 		self
 	}
 
@@ -135,8 +143,10 @@ impl<R:Runtime> StoreBuilder<R> {
 	///
 	/// # Ok(())
 	/// # }
+
 	pub fn deserialize(mut self, deserialize:DeserializeFn) -> Self {
 		self.deserialize = deserialize;
+
 		self
 	}
 
@@ -151,6 +161,7 @@ impl<R:Runtime> StoreBuilder<R> {
 	///
 	/// # Ok(())
 	/// # }
+
 	pub fn build(self) -> Store<R> {
 		Store {
 			app:self.app,
@@ -177,6 +188,7 @@ impl<R:Runtime> Store<R> {
 	/// Update the store from the on-disk state
 	pub fn load(&mut self) -> Result<(), Error> {
 		let app_dir = self.app.path_resolver().app_data_dir().expect("failed to resolve app dir");
+
 		let store_path = app_dir.join(&self.path);
 
 		let bytes = read(store_path)?;
@@ -189,12 +201,15 @@ impl<R:Runtime> Store<R> {
 	/// Saves the store to disk
 	pub fn save(&self) -> Result<(), Error> {
 		let app_dir = self.app.path_resolver().app_data_dir().expect("failed to resolve app dir");
+
 		let store_path = app_dir.join(&self.path);
 
 		create_dir_all(store_path.parent().expect("invalid store path"))?;
 
 		let bytes = (self.serialize)(&self.cache).map_err(Error::Serialize)?;
+
 		let mut f = File::create(&store_path)?;
+
 		f.write_all(&bytes)?;
 
 		Ok(())
@@ -202,6 +217,7 @@ impl<R:Runtime> Store<R> {
 
 	pub fn insert(&mut self, key:String, value:JsonValue) -> Result<(), Error> {
 		self.cache.insert(key.clone(), value.clone());
+
 		self.app.emit_all(
 			"store://change",
 			ChangePayload { path:&self.path, key:&key, value:&value },
@@ -216,24 +232,29 @@ impl<R:Runtime> Store<R> {
 
 	pub fn delete(&mut self, key:impl AsRef<str>) -> Result<bool, Error> {
 		let flag = self.cache.remove(key.as_ref()).is_some();
+
 		if flag {
 			self.app.emit_all(
 				"store://change",
 				ChangePayload { path:&self.path, key:key.as_ref(), value:&JsonValue::Null },
 			)?;
 		}
+
 		Ok(flag)
 	}
 
 	pub fn clear(&mut self) -> Result<(), Error> {
 		let keys:Vec<String> = self.cache.keys().cloned().collect();
+
 		self.cache.clear();
+
 		for key in keys {
 			self.app.emit_all(
 				"store://change",
 				ChangePayload { path:&self.path, key:&key, value:&JsonValue::Null },
 			)?;
 		}
+
 		Ok(())
 	}
 
@@ -254,8 +275,10 @@ impl<R:Runtime> Store<R> {
 						);
 					}
 				}
+
 				self.cache.clone_from(defaults);
 			}
+
 			Ok(())
 		} else {
 			self.clear()
