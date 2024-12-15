@@ -14,12 +14,12 @@ use serde::Serialize;
 pub use serde_json::Value as JsonValue;
 pub use store::{Store, StoreBuilder};
 use tauri::{
-	plugin::{self, TauriPlugin},
 	AppHandle,
 	Manager,
 	RunEvent,
 	Runtime,
 	State,
+	plugin::{self, TauriPlugin},
 };
 
 mod error;

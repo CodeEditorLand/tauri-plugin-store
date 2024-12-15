@@ -4,7 +4,7 @@
 
 use std::{
 	collections::HashMap,
-	fs::{create_dir_all, read, File},
+	fs::{File, create_dir_all, read},
 	io::Write,
 	path::PathBuf,
 };
